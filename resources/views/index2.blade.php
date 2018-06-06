@@ -110,8 +110,8 @@
 							</div>
 						</div>
 					</div> --}}
-					<div class="col-md-12">
-							<div class="active_filters">
+					{{-- <div class="col-md-12">
+							 <div class="active_filters">
 								<div class="filter_active">
 										<div class="pull-left">
 											<span>Titulo: "ASP"</span>
@@ -135,11 +135,33 @@
 										</div>	
 									</div>		
 								</div>
-							</div>						
-					</div>
+							</div>					
+					</div> --}}
+
 				</div>
 			</div>
 		</section>
+
+{{-- 		<h2>Small Modal</h2>
+  <!-- Trigger the modal with a button -->
+  <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Small Modal</button>
+
+		<div class="modal" id="myModal" role="dialog">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Modal Header</h4>
+        </div>
+        <div class="modal-body">
+          <p>This is a small modal.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div> --}}
 
 		<section id="footer">
 			
@@ -253,22 +275,29 @@
 					},
 					titulo:{
 						type:'text',
+					},
+					categoria:{
+						type:'text',
+					},
+					labels:{
+						type:'select'
 					}
 				};
-
-
 
 			var filter = new cor_filter();
 
 			filter.setFilters(json);
 
+
+
 			filter.instance.add_filter_text = 'Añadir Filtros';
+			filter.instance.save_filter_text = 'Guardar Filtros';
 
 			filter.create('.cor_filter');
 
 
 
-			$('.listen_main_input').keyup(function(e){
+			/*$('.listen_main_input').keyup(function(e){
 				
 				var code = e.which;
 
@@ -300,10 +329,10 @@
 					$('.dropdown-filter').removeClass('open');
 					$('.dropdown-filter').addClass('open');
 				}
-			});
+			});*/
 
 
-			$('.listen_click_filter_option').on('click', 'a', function(){
+			/*$('.listen_click_filter_option').on('click', 'a', function(){
 
 				if($('.listen_main_input').val() === ''){
 
@@ -322,22 +351,22 @@
 				$('.dropdown-filter').removeClass('open');
 				}
 
-			});
+			});*/
 
 
-			$('.listen_main_input').on('focus',function(){
+			/*$('.listen_main_input').on('focus',function(){
 				$('.dropdown-filter').addClass('open');
 			});
 
 
 			$('.listen_main_input').on('focusout',function(){
 				$('.dropdown-filter').removeClass('open');
-			});
+			});*/
 
 
-			$('.active_filters').on('click', 'div.listen_close_option', function(){
+			/*$('.active_filters').on('click', 'div.listen_close_option', function(){
 				$(this).closest('.filter_active').remove();
-			});
+			});*/
 
 
 			$('.listen_add_filter_button').on('click', function(){
@@ -345,7 +374,7 @@
 				$('.dropdown-filter').addClass('open');
 			});
 
-/*
+			/*
 			$('.listen_click_delete_filters').click(function(){
 				
 
