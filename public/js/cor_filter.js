@@ -9,12 +9,14 @@ class cor_filter {
 			 save_filter_text:'Save Filters',
 			 delete_all_filters_text:'Delete Filters',
 			 options_content_text: 'has',
+			 modal_action: 'Add'
 		}
 		
 
 		this.attributes = {
 			params:[],
 			filters:[],
+			modal_filter:false,
 
 		}
 
@@ -41,6 +43,8 @@ class cor_filter {
        		active_filters: '.active_filters',
 
        		dropdown_filter: '.dropdown_filter',
+
+       		modal_filter: '.modal_filter',
 
         }
 
@@ -75,6 +79,15 @@ class cor_filter {
 
             input_list_value : '.input_list_value',
 
+
+            modal_body: '.modal-body',
+
+            modal_action: '.modal-action',
+
+            modal_label_filter: '.modal-label-filter',
+
+            modal_input: '.modal-input',
+
         }
 
 		/**
@@ -84,7 +97,7 @@ class cor_filter {
         	click_option: function (){return false;},
         	after_click_option: function (){return false;},
 
-        	filter_added: function() {return false;},
+        	updateData: function() {return false;},
             after_delete_filter:function() {return false;},
 
             delete_all_filters: function(){return false;}
@@ -109,6 +122,7 @@ class cor_filter {
         	listen_add_filter_button:'.listen_add_filter_button',
         	listen_click_save_filters: '.listen_click_save_filters',
         	listen_click_delete_filters: '.listen_click_delete_filters',
+        	listen_click_modal_filter: '.listen_click_modal_filter',
         }
 
        	/**
@@ -133,13 +147,15 @@ class cor_filter {
 
             dropdown_filter:'',
 
+            modal_filter: ''
+
         }
 	}
 
 
 	
 	/**
-	*	set all the filters
+	*	set all filters
 	*
 	*	Setea todos los filtros que el componente va a usar
 	**/
@@ -160,6 +176,62 @@ class cor_filter {
 		});
 
 		this.attributes.filters = arr;
+	}
+
+
+	/**
+	*	Update params and run callbacks
+	*
+	*	
+	**/
+	updateParams(){
+
+		console.log('params');
+
+		var self = this;
+
+			for (var key in this.attributes.filters) {
+
+				if(self.attributes.filters[key]['active']==true){
+					self.attributes.params[key] = self.attributes.filters[key]['value'];
+				}
+			}
+
+		this.sendParams();
+
+	}
+
+
+	/**
+	*	Send params
+	*
+	*	
+	**/
+	sendParams(){
+
+		console.log('enviando...');
+
+		var self = this;
+
+		 if (typeof self.callbacks.updateData !== 'undefined') {
+                self.callbacks.updateData(this.attributes.params);
+            }
+
+	}
+
+
+	/**
+	*	Delete params and run callbacks
+	*
+	*	
+	**/
+
+	deleteParams(filter){
+
+		delete this.attributes.params[filter];
+
+		this.sendParams();
+
 	}
 
 
@@ -207,10 +279,83 @@ class cor_filter {
 
         this.listenMainInputOnBlur();
 
+        this.listenClickModalFilter();
+
+        this.listenModalFilterOnBlur();
+
+        this.listenModalFilterOnType();
+
     }
 
 
     /**
+	*	Start Configuration
+	*
+	*	
+	**/
+    setStartConfiguration(source_container){
+
+    	console.log('Configurating...');
+
+
+    	this.containers.source_container = source_container;
+
+		/*this.createTemplates();*/
+
+        /** seteamos si tiene un select de origen **/
+       /* if (source_container) {
+            * identifico el select de origen *
+            this.setSelectIdentity(source_container);
+        }*/
+
+
+    }
+
+
+	/**
+	*	Create modal with options
+	*
+	*
+	**/
+
+	createModal(el, type, filter){
+
+		var modal =
+		`<div class="`+this.getClassOrIdName(this.styles.modal_body)+`" data-filter="`+filter+`" data-type="`+type+`">
+		    <label for="input-filter" class="`+this.getClassOrIdName(this.styles.modal_label_filter)+`">`+filter.toUpperCase()+`</label>
+		    <input type="text" value="" class="`+this.getClassOrIdName(this.styles.modal_input)+`">
+		  </div>
+		<a href="" class="`+this.getClassOrIdName(this.styles.modal_action)+` `+this.getClassOrIdName(this.listeners.listen_click_modal_filter)+`">`+this.instance.modal_action+`</a>`;
+
+		$(this.containers.modal_filter).append(modal);
+
+		var position = $(el).offset();
+
+		$(this.containers.modal_filter).css({'top': (position.top)+'px', 'left': position.left+'px', 'visibility': 'visible'});
+
+		$(this.styles.modal_input).focus();
+
+		this.attributes.modal_filter = true;
+	}
+
+
+	/**
+	*	Destroy modal
+	*
+	*
+	**/
+
+	destroyModal(){
+
+		$(this.containers.modal_filter).css({'visibility': 'hidden'});
+
+		$(this.containers.modal_filter).html('');
+
+		this.attributes.modal_filter = false;
+	}
+
+	
+	/**
 	*	Open option list on input focus
 	*
 	*	Evento para abrir el dropdown en el focus del input
@@ -240,6 +385,31 @@ class cor_filter {
 		});
 	}
 
+
+	/**
+	*	Close modal on input blur
+	*
+	*	Evento para cerrar el modal cuando se pierda el focus del input
+	**/
+	listenModalFilterOnBlur(){
+		var self = this;
+
+		$(this.containers.modal_filter).on('blur', function(){
+
+				setTimeout(function(){ self.destroyModal(); }, 100);
+			
+		});
+
+		/*$(document).on('click', function(event){
+			if (!$(event.target).closest($(self.getInstance()).find(self.containers.modal_filter)).length
+				&& self.attributes.modal_filter==true) {
+                    self.destroyModal();
+               }
+		});*/
+
+
+	}
+
     /**
 	*	Delete all filters event
 	*
@@ -265,6 +435,8 @@ class cor_filter {
 						self.attributes.filters[filter]['value'] = '';
 
 						self.updateFilterList(filter);
+
+						self.deleteParams(filter);
 					
 				});
 		});
@@ -283,25 +455,96 @@ class cor_filter {
 		$(this.listeners.listen_click_filter_option).on('click', 'li', function(){
 
 			var filter = $(this).data('filter');
+			var type = $(this).data('type');
 			var value = $(self.styles.input).val();
+			var el = $(self.containers.dropdown_filter);
 
+				if(type!='text'){				
 
-			if (value!=''){
-				self.addFilter(filter, value);
+				}else{
 
-				self.removeFilterOption(filter);
+					if (value!=''){
 
-				self.showAllFilterOptions();
-			}else{
+						self.addFilter(filter, value);
 
-			}
+						self.removeFilterOption(filter);
+
+						self.showAllFilterOptions();
+
+					}else{
+
+						$(self.containers.dropdown_filter).removeClass('open');
+						
+						self.createModal(el, type, filter);
+					}
+				}
 			
 			$(self.styles.input).val('');
 			$('.input_list_value').text('');
+			/*$(self.containers.dropdown_filter).addClass('open');
+
+			setTimeout(function(){ $(self.containers.dropdown_filter).removeClass('open'); }, 5000);*/
 
 		});
 
 	}
+
+	/**
+	*	listen click modal event
+	*
+	*	Añadir filtro desde modal
+	**/
+	listenClickModalFilter(){
+
+		var self = this;
+
+		$(this.containers.modal_filter).on('click', 'a', function(e){
+			e.preventDefault();
+
+			var filter = $(self.styles.modal_body).data('filter');
+			var value = $(self.styles.modal_input).val();
+
+			self.addFilter(filter, value);
+
+			self.removeFilterOption(filter);
+
+			self.showAllFilterOptions();
+
+			self.destroyModal();
+
+		});
+	}
+
+    /**
+	*	Delete all filters event
+	*
+	*	Se eliminan todos los filtros actuales
+	**/
+	listenModalFilterOnType(){
+
+		var self = this;
+
+		$(this.containers.modal_filter).on('keyup', this.styles.modal_input, function(e)
+		{
+			var code = e.which;
+
+			if(code==13||code==188||code==186)
+			{
+					var filter = $(self.styles.modal_body).data('filter');
+					var value = $(self.styles.modal_input).val();
+
+					self.addFilter(filter, value);
+
+					self.removeFilterOption(filter);
+
+					self.showAllFilterOptions();
+
+					self.destroyModal();
+			}
+
+		});
+	}
+
 
 	/**
 	*	listen delete filter
@@ -341,14 +584,7 @@ class cor_filter {
 		$(this.containers.source_container).on('keyup', this.listeners.listen_main_input, function(e)
 		{
 			var code = e.which;
-
-			//Si se presiona la tecla ENTER se atrapa el evento de esta manera
-			if(code==13||code==188||code==186)
-			{
-				/*$(this).val('');
-				$(self.styles.input_list_value).text('');	*/
-			}
-
+			
 			// Si el input queda vacio muestra de nuevo todo tipo de opciones
 			if($(this).val() === '')
 			{
@@ -369,6 +605,96 @@ class cor_filter {
 			}
 
 		});
+	}
+
+
+	/**
+	*	AddFilter
+	*
+	*	Cambia el filtro a activo y lo añade a la lista
+	**/
+	
+	addFilter(filter, value){
+
+		var self = this;
+		
+		if (value!=''){
+
+			$(this.containers.active_filters).prepend(`
+			<div class="`+this.getClassOrIdName(this.styles.filter_active)+`" data-filter='`+filter+`'>
+			<div class="pull-left">
+			<span>`+filter.charAt(0).toUpperCase() + filter.slice(1)+`: `+value+`</span>
+			</div>
+			<div class="`+this.getClassOrIdName(this.styles.close_filter_wrapper)+` pull-right `+this.getClassOrIdName(this.listeners.listen_close_option)+`">
+			<i class="fal fa-times `+this.getClassOrIdName(this.styles.close_icon)+`"></i>
+			</div>
+			</div>`);
+
+			for (var key in this.attributes.filters) {
+
+				if(key === filter){
+					self.attributes.filters[key]['active'] = true;
+
+					self.attributes.filters[key]['value'] = value;
+				}
+
+			}
+
+
+			self.updateParams();
+		}
+
+	}
+
+
+	/**
+	*	Delete active filter
+	*
+	*	Remueve la opción de la lista de filtrado
+	**/
+
+	deleteActiveFilter(filter){
+
+		var self = this;
+
+			for (var key in this.attributes.filters) {
+
+				if(key === filter){
+					self.attributes.filters[key]['active'] = false;
+
+					self.attributes.filters[key]['value'] = '';
+
+					self.deleteParams(filter);
+				}
+
+			}
+
+	}
+
+
+	/**
+	*	update filter list
+	*
+	*	Update filter list and add and option
+	**/
+
+	updateFilterList(filter){
+
+		$("li[data-filter='" + filter + "']").show();
+
+
+	}
+
+	/**
+	*	Remove Filter Option
+	*
+	*	Remueve la opción de la lista de filtrado
+	**/
+
+	removeFilterOption(filter){
+
+		$("li[data-filter='" + filter + "']").hide();
+
 	}
 
 	/**
@@ -431,97 +757,12 @@ class cor_filter {
 	}
 
 
-	/**
-	*	AddFilter
-	*
-	*	Cambia el filtro a activo y lo añade a la lista
-	**/
-	
-	addFilter(filter, value){
-
-		var self = this;
-		
-		if (value!=''){
-
-			$(this.containers.active_filters).prepend(`
-			<div class="`+this.getClassOrIdName(this.styles.filter_active)+`" data-filter='`+filter+`'>
-			<div class="pull-left">
-			<span>`+filter.charAt(0).toUpperCase() + filter.slice(1)+`: `+value+`</span>
-			</div>
-			<div class="`+this.getClassOrIdName(this.styles.close_filter_wrapper)+` pull-right `+this.getClassOrIdName(this.listeners.listen_close_option)+`">
-			<i class="fal fa-times `+this.getClassOrIdName(this.styles.close_icon)+`"></i>
-			</div>
-			</div>`);
-
-			for (var key in this.attributes.filters) {
-
-				if(key === filter){
-					self.attributes.filters[key]['active'] = true;
-
-					self.attributes.filters[key]['value'] = value;
-				}
-
-			}
-		}
-
-	}
-
-
-	/**
-	*	Delete active filter
-	*
-	*	Remueve la opción de la lista de filtrado
-	**/
-
-	deleteActiveFilter(filter){
-
-		var self = this;
-
-			for (var key in this.attributes.filters) {
-
-				if(key === filter){
-					self.attributes.filters[key]['active'] = false;
-
-					self.attributes.filters[key]['value'] = '';
-				}
-
-			}
-
-	}
-
-
-	/**
-	*	update filter list
-	*
-	*	Update filter list and add and option
-	**/
-
-	updateFilterList(filter){
-
-		$("li[data-filter='" + filter + "']").show();
-
-	}
-
-	/**
-	*	Remove Filter Option
-	*
-	*	Remueve la opción de la lista de filtrado
-	**/
-
-	removeFilterOption(filter){
-
-		$("li[data-filter='" + filter + "']").hide();
-
-	}
-
     /**
 	*	Create Templates
 	*
 	*	Se crean los templates de cada parte del filter
 	**/
     createTemplates() {
-
-    	console.log('Creating templates...');
 
     	/** Template de las opciones principales del header **/
 
@@ -587,10 +828,17 @@ class cor_filter {
 	    </div>`;
 
 
+	    /** Template del modal con opciones **/
+
+	    this.templates.modal_filter =
+	     `<div class="`+this.getClassOrIdName(this.containers.modal_filter)+`" id="`+this.getClassOrIdName(this.containers.modal_filter)+`"></div>`
+
 
         $(this.containers.source_container).append(this.templates.container_cor_filters_options);
 
         $(this.containers.source_container).append(this.templates.filters_container);
+
+        $(this.containers.source_container).append(this.templates.modal_filter);
 
         $(this.containers.active_filters).append(this.templates.container_input_filter);
 
@@ -609,29 +857,6 @@ class cor_filter {
 	**/
     getClassOrIdName(name) {
         return name.substr(1);
-    }
-
-    /**
-	*	Start Configuration
-	*
-	*	
-	**/
-    setStartConfiguration(source_container){
-
-    	console.log('Configurating...');
-
-
-    	this.containers.source_container = source_container;
-
-		/*this.createTemplates();*/
-
-        /** seteamos si tiene un select de origen **/
-       /* if (source_container) {
-            * identifico el select de origen *
-            this.setSelectIdentity(source_container);
-        }*/
-
-
     }
 
 

@@ -137,39 +137,166 @@
 								</div>
 							</div>					
 					</div> --}}
-
 				</div>
 			</div>
 		</section>
-
-{{-- 		<h2>Small Modal</h2>
-  <!-- Trigger the modal with a button -->
-  <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Small Modal</button>
-
-		<div class="modal" id="myModal" role="dialog">
-    <div class="modal-dialog modal-sm">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">Modal Header</h4>
-        </div>
-        <div class="modal-body">
-          <p>This is a small modal.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div> --}}
 
 		<section id="footer">
 			
 		</section>
 
+{{-- <div class="modal-overlay" id="modal-overlay"></div> --}}
+
+   {{-- <div class="modal_filter" id="modal_filter">
+		  <div class="modal-header modal-cor-filter">
+				 <h1>Añadir Filtros</h1>
+				 <button class="close-button" id="close-button"><i class="fal fa-times closeLabel"></i></button>
+		  </div>
+		  <div class="modal-body">
+		    <label for="input-filter" class="modal-label-filter">Nombre:</label>
+		    <input type="text" value="" class="modal-input" data-filter="" data-type="" data-value="">
+		  </div>
+
+		   <a href="" class="modal-action ">APLICAR</a>
+	
+		</div> --}}
+
 	</div>
 
-	<style>
+	<style>	
+		.modal_filter {
+		  /* This way it could be display flex or grid or whatever also. */
+		  display: block;
+
+		  visibility: hidden;
+		  
+		  /* Probably need media queries here */
+		  width: 250px;
+		  max-width: 100%;
+		  
+		  min-height: 150px;
+		  height: 150px;
+		  max-height: 400px;
+		  
+		  /* Use this for centering if unknown width/height */
+		  /*transform: translate(-50%, -50%);*/
+		  position: fixed;
+		  z-index: 1000;
+		  
+		  /* If known, negative margins are probably better (less chance of blurry text). */
+		  /* margin: -200px 0 0 -200px; */
+		  
+		  background: white;
+		  box-shadow: 0px 0 5px 1px rgba(0, 0, 0, 0.3);
+		  /*transition: all 2s cubic-bezier(0.23, 1, 0.32, 1);*/
+		  
+		}
+
+		.modal_filter h1{
+			margin: 0 !important;
+		    font-size: 1.5em;
+		    letter-spacing: -1px;
+		    color: #3B606B;
+		    font-weight: 100;
+		}
+		.modal-input{
+			width: 100%;
+			height: 40px;
+			padding: 1px;
+			font-size: 16px;
+			border:0px;
+			border-bottom: 1px solid #333;
+		}
+		.modal-label-filter{
+			color:#707070;
+		}
+		.modal-input:focus{
+			outline: -webkit-focus-ring-color auto 0px;
+		}
+		.modal-header{
+			width: 100%;
+			max-width: 100%;
+		}
+		.modal-cor-filter{
+			background-color:#273E46;
+		}
+		.modal-cor-filter h1{
+			color: #fff !important;
+		}
+		.closed {
+		  display: none;
+		}
+		.modal-overlay {
+		  position: fixed;
+		  top: 0;
+		  left: 0;
+		  width: 100%;
+		  height: 100%;
+		  z-index: 50;
+		  background: rgba(0, 0, 0, 0.6);
+		}
+
+		.modal_filter .modal-action{
+		  position: absolute;
+		  z-index: 1;
+		  color: #273E46;
+		  bottom: 10px;
+		  font-size: 16px;
+		  font-weight: 400;
+		  right: 10px;
+		}
+
+		.modal-action:hover{
+			text-decoration: none;
+			background-color:#eee; 
+		}
+
+		.modal_filter .close-button {
+		  position: absolute;
+		  
+		  z-index: 1;
+		  
+		  top: 5px;
+		  
+		  right: 0px;
+		  
+		  border: 0;
+		  background-color: #273E46; 
+		  color: #fff;
+		  padding: 5px 10px;
+		  font-size: 1.3rem;
+		}
+
+		.open-button {
+		  border: 0;
+		  position: absolute;
+		  top: 50%;
+		  left: 50%;
+		  transform: translate(-50%, -50%);
+		  background: lightgreen;
+		  color: white;
+		  padding: 10px 20px;
+		  border-radius: 10px;
+		  font-size: 21px;
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		.cor_filter a:hover, .cor_filter a:focus, .cor_filter a:visited{
 			text-decoration: none;
 			color:#3B606B;
@@ -265,6 +392,22 @@
 
 		<script>
 
+			/*var modal = document.querySelector("#modal");
+			var modalOverlay = document.querySelector("#modal-overlay");
+			var closeButton = document.querySelector("#close-button");
+			var openButton = document.querySelector("#open-button");
+
+			closeButton.addEventListener("click", function() {
+			  modal.classList.toggle("closed");
+			  modalOverlay.classList.toggle("closed");
+			});
+
+			openButton.addEventListener("click", function() {
+			  modal.classList.toggle("closed");
+			  modalOverlay.classList.toggle("closed");
+			});*/
+
+
 			var json =
 				{
 					nombre:{
@@ -288,13 +431,14 @@
 
 			filter.setFilters(json);
 
-
-
 			filter.instance.add_filter_text = 'Añadir Filtros';
 			filter.instance.save_filter_text = 'Guardar Filtros';
 
 			filter.create('.cor_filter');
 
+			filter.callbacks.updateData = function(params){
+				console.log(params);
+			};
 
 
 			/*$('.listen_main_input').keyup(function(e){
